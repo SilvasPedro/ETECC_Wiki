@@ -111,14 +111,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
         }`}
       >
         {/* Brand Header */}
-        <div className="p-4 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between">
+        <div className="p-4 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between shrink-0">
           <div 
             onClick={() => { onSelectCategory(null); onClose(); }} 
             className="flex items-center gap-2.5 cursor-pointer group"
           >
-            <div className="w-8 h-8 rounded-xl bg-[#e4022c] text-white flex items-center justify-center font-black text-base shadow-sm group-hover:scale-105 transition">
-              E
-            </div>
+            <img 
+              src="/etecc_logo.png" 
+              alt="ETECC Logo" 
+              className="h-8 w-auto object-contain max-h-8 group-hover:scale-105 transition"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = '/logo_etecc.png';
+              }}
+            />
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold text-sm tracking-tight text-stone-900 dark:text-white">
@@ -134,17 +139,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           <button
             onClick={onClose}
-            className="md:hidden p-1.5 rounded-lg text-stone-400 hover:text-stone-700 dark:hover:text-stone-200"
+            className="md:hidden p-1.5 rounded-lg text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Quick Actions (New Article & Quick Search) */}
-        <div className="p-3 space-y-2 border-b border-stone-200 dark:border-stone-800">
+        <div className="p-3 space-y-2 border-b border-stone-200 dark:border-stone-800 shrink-0">
           <button
             onClick={() => { onNewArticle(); onClose(); }}
-            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-[#e4022c] hover:bg-[#c30024] active:scale-98 text-white font-semibold text-xs transition shadow-sm shadow-red-600/20"
+            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-[#e4022c] hover:bg-[#c30024] active:scale-98 text-white font-semibold text-xs transition shadow-sm shadow-red-600/20 cursor-pointer"
           >
             <PlusCircle className="w-4 h-4" />
             <span>Novo Artigo no Wiki</span>
@@ -152,7 +157,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           <button
             onClick={() => { onOpenSearch(); onClose(); }}
-            className="w-full flex items-center justify-between py-1.5 px-3 rounded-xl bg-white dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/60 text-stone-500 dark:text-stone-400 text-xs hover:border-[#e4022c] transition"
+            className="w-full flex items-center justify-between py-1.5 px-3 rounded-xl bg-white dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/60 text-stone-500 dark:text-stone-400 text-xs hover:border-[#e4022c] transition cursor-pointer"
           >
             <span className="flex items-center gap-2">
               <Search className="w-3.5 h-3.5 text-[#e4022c]" />
@@ -165,7 +170,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Scrollable Navigation Area */}
-        <div className="flex-1 overflow-y-auto px-3 py-3 space-y-5">
+        <div className="flex-1 min-h-0 overflow-y-auto px-3 py-3 space-y-5">
           {/* Main Views */}
           <div className="space-y-1">
             <button
@@ -287,35 +292,41 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
         </div>
 
-        {/* User Footer Profile & photoURL Display */}
-        <div className="p-3 border-t border-stone-200 dark:border-stone-800 bg-stone-100/50 dark:bg-stone-950/50">
+        {/* User Footer Profile & photoURL Display - Firmly Fixed at Bottom */}
+        <div className="p-3 border-t border-stone-200 dark:border-stone-800 bg-stone-100/95 dark:bg-stone-950/95 backdrop-blur-md shrink-0 sticky bottom-0 z-20 shadow-xs">
           {user ? (
             <div
               onClick={() => { onOpenProfile(); onClose(); }}
-              className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-white dark:hover:bg-stone-800 cursor-pointer transition border border-transparent hover:border-stone-200 dark:hover:border-stone-700"
+              className="flex items-center gap-2.5 p-2 rounded-xl bg-white/70 dark:bg-stone-800/70 hover:bg-white dark:hover:bg-stone-800 cursor-pointer transition border border-stone-200/80 dark:border-stone-700/80 shadow-2xs group"
+              title="Clique para editar seu perfil, cargo e setor"
             >
-              <img
-                src={user.photoURL || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.displayName || user.email || 'ETECC')}`}
-                alt={user.displayName || 'Colaborador'}
-                className="w-9 h-9 rounded-full object-cover ring-2 ring-[#e4022c] shrink-0"
-              />
+              <div className="relative shrink-0">
+                <img
+                  src={user.photoURL || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.displayName || user.email || 'ETECC')}`}
+                  alt={user.displayName || 'Colaborador'}
+                  className="w-9 h-9 rounded-full object-cover ring-2 ring-[#e4022c]"
+                />
+                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-stone-900" title="Online" />
+              </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-stone-900 dark:text-white truncate">
+                <p className="text-xs font-bold text-stone-900 dark:text-white truncate group-hover:text-[#e4022c] transition-colors">
                   {user.displayName || 'Colaborador ETECC'}
                 </p>
-                {(userProfile?.role || userProfile?.department) && (
+                {(userProfile?.role || userProfile?.department) ? (
                   <p className="text-[10px] font-semibold text-[#e4022c] dark:text-[#ff4d6a] truncate">
                     {[userProfile.role, userProfile.department].filter(Boolean).join(' • ')}
                   </p>
+                ) : (
+                  <p className="text-[10px] text-stone-400 truncate">Configurar cargo/setor</p>
                 )}
-                <p className="text-[10px] text-stone-400 truncate">{user.email}</p>
+                <p className="text-[10px] text-stone-400 dark:text-stone-500 truncate">{user.email}</p>
               </div>
-              <ChevronRight className="w-4 h-4 text-stone-400 shrink-0" />
+              <ChevronRight className="w-4 h-4 text-stone-400 group-hover:text-stone-700 dark:group-hover:text-stone-200 group-hover:translate-x-0.5 transition-all shrink-0" />
             </div>
           ) : (
             <button
               onClick={() => { onOpenAuth(); onClose(); }}
-              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl border border-[#e4022c]/40 text-[#e4022c] hover:bg-[#e4022c] hover:text-white text-xs font-semibold transition"
+              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl border border-[#e4022c]/40 text-[#e4022c] hover:bg-[#e4022c] hover:text-white text-xs font-semibold transition cursor-pointer"
             >
               <UserIcon className="w-3.5 h-3.5" />
               <span>Entrar no Wiki</span>

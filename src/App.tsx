@@ -215,40 +215,40 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-sans selection:bg-[#e4022c] selection:text-white">
-      {/* Top Navigation */}
-      <Navbar
-        onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
+    <div className="min-h-screen flex bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-sans selection:bg-[#e4022c] selection:text-white">
+      {/* Guia Lateral (Sidebar) - Pinned from top to bottom (100vh) */}
+      <Sidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        articles={articles}
+        categories={categories}
+        currentArticle={currentArticle}
+        selectedCategory={selectedCategory}
+        onSelectCategory={handleSelectCategory}
+        onSelectArticle={handleSelectArticle}
+        onNewArticle={handleNewArticle}
         onOpenSearch={() => setIsSearchOpen(true)}
         onOpenAuth={() => setIsAuthOpen(true)}
         onOpenProfile={() => setIsProfileOpen(true)}
-        onNewArticle={handleNewArticle}
-        theme={theme}
-        resolvedTheme={resolvedTheme}
-        onToggleTheme={toggleTheme}
         user={user}
+        userProfile={userProfile}
+        tocItems={tocItems}
+        activeHeadingId={activeHeadingId}
       />
 
-      {/* Main Layout: Guia Lateral (Sidebar) + Content Canvas */}
-      <div className="flex-1 flex w-full">
-        {/* Guia Lateral */}
-        <Sidebar
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-          articles={articles}
-          categories={categories}
-          currentArticle={currentArticle}
-          selectedCategory={selectedCategory}
-          onSelectCategory={handleSelectCategory}
-          onSelectArticle={handleSelectArticle}
-          onNewArticle={handleNewArticle}
+      {/* Main Content Area: Sticky Navbar at top + Center Work Area */}
+      <div className="flex-1 flex flex-col min-w-0 min-h-screen">
+        {/* Top Navigation */}
+        <Navbar
+          onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
           onOpenSearch={() => setIsSearchOpen(true)}
           onOpenAuth={() => setIsAuthOpen(true)}
           onOpenProfile={() => setIsProfileOpen(true)}
+          onNewArticle={handleNewArticle}
+          theme={theme}
+          resolvedTheme={resolvedTheme}
+          onToggleTheme={toggleTheme}
           user={user}
-          userProfile={userProfile}
-          tocItems={tocItems}
-          activeHeadingId={activeHeadingId}
         />
 
         {/* Dynamic Center Work Area */}
