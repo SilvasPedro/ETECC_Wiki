@@ -7,6 +7,7 @@ interface QuickSearchModalProps {
   isOpen: boolean;
   onClose: () => void;
   articles: Article[];
+  categories?: ArticleCategory[];
   onSelectArticle: (article: Article) => void;
 }
 
@@ -14,6 +15,7 @@ export const QuickSearchModal: React.FC<QuickSearchModalProps> = ({
   isOpen,
   onClose,
   articles,
+  categories = [],
   onSelectArticle,
 }) => {
   const [query, setQuery] = useState('');
@@ -121,22 +123,24 @@ export const QuickSearchModal: React.FC<QuickSearchModalProps> = ({
           >
             Todos ({articles.length})
           </button>
-          {DEFAULT_CATEGORIES.map((cat) => {
-            const count = articles.filter((a) => a.category === cat.id).length;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition ${
-                  selectedCategory === cat.id
-                    ? 'bg-[#e4022c] text-white shadow-xs'
-                    : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800'
-                }`}
-              >
-                {cat.name} ({count})
-              </button>
-            );
-          })}
+          {(categories.length > 0 ? categories : DEFAULT_CATEGORIES)
+            .filter((cat) => articles.some((a) => a.category === cat.id))
+            .map((cat) => {
+              const count = articles.filter((a) => a.category === cat.id).length;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition cursor-pointer ${
+                    selectedCategory === cat.id
+                      ? 'bg-[#e4022c] text-white shadow-xs'
+                      : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800'
+                  }`}
+                >
+                  {cat.name} ({count})
+                </button>
+              );
+            })}
         </div>
 
         {/* Results List */}

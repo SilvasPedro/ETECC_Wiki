@@ -15,13 +15,15 @@ import {
   Users, 
   CheckSquare,
   Bookmark,
-  Calendar
+  Calendar,
+  Folder
 } from 'lucide-react';
 import { Article, ArticleCategory } from '../types/wiki';
 import { DEFAULT_CATEGORIES } from '../data/defaultArticles';
 
 interface ArticleListProps {
   articles: Article[];
+  categories?: ArticleCategory[];
   selectedCategory: string | null;
   onSelectCategory: (categoryId: string | null) => void;
   onSelectArticle: (article: Article) => void;
@@ -31,6 +33,7 @@ interface ArticleListProps {
 
 export const ArticleList: React.FC<ArticleListProps> = ({
   articles,
+  categories = [],
   selectedCategory,
   onSelectCategory,
   onSelectArticle,
@@ -42,9 +45,10 @@ export const ArticleList: React.FC<ArticleListProps> = ({
 
   const categoryMap = useMemo(() => {
     const map = new Map<string, ArticleCategory>();
-    DEFAULT_CATEGORIES.forEach((c) => map.set(c.id, c));
+    const list = categories.length > 0 ? categories : DEFAULT_CATEGORIES;
+    list.forEach((c) => map.set(c.id, c));
     return map;
-  }, []);
+  }, [categories]);
 
   const getCategoryIcon = (iconName?: string) => {
     switch (iconName) {
@@ -54,6 +58,7 @@ export const ArticleList: React.FC<ArticleListProps> = ({
       case 'Code2': return <Code2 className="w-4 h-4" />;
       case 'Users': return <Users className="w-4 h-4" />;
       case 'CheckSquare': return <CheckSquare className="w-4 h-4" />;
+      case 'Folder': return <Folder className="w-4 h-4" />;
       default: return <BookOpen className="w-4 h-4" />;
     }
   };

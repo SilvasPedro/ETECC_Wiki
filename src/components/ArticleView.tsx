@@ -17,9 +17,10 @@ import {
   Sparkles,
   ArrowLeft,
   Tag as TagIcon,
-  AlertTriangle
+  AlertTriangle,
+  X
 } from 'lucide-react';
-import { Article, ArticleComment, UserProfile } from '../types/wiki';
+import { Article, ArticleCategory, ArticleComment, UserProfile } from '../types/wiki';
 import { DEFAULT_CATEGORIES } from '../data/defaultArticles';
 import { renderMarkdownToHtml } from '../utils/markdown';
 import { User } from 'firebase/auth';
@@ -27,6 +28,7 @@ import { subscribeComments, addArticleComment } from '../firebase/wikiService';
 
 interface ArticleViewProps {
   article: Article;
+  categories?: ArticleCategory[];
   onEdit: (article: Article) => void;
   onDelete?: (articleId: string) => Promise<void>;
   onBack: () => void;
@@ -39,6 +41,7 @@ interface ArticleViewProps {
 
 export const ArticleView: React.FC<ArticleViewProps> = ({
   article,
+  categories = [],
   onEdit,
   onDelete,
   onBack,
@@ -51,6 +54,7 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
   const [copied, setCopied] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [zoomImage, setZoomImage] = useState<string | null>(null);
 
   // Security check: Only original creator can edit or delete this post
   const isAuthor = Boolean(user && article.author.uid === user.uid);
@@ -68,7 +72,14 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
 
   const [newCommentText, setNewCommentText] = useState('');
 
-  const categoryObj = DEFAULT_CATEGORIES.find((c) => c.id === article.category);
+  const categoryObj = (categories.length > 0 ? categories : DEFAULT_CATEGORIES).find(
+    (c) => c.id === article.category
+  ) || {
+    id: article.category,
+    name: article.category.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+    iconName: 'Folder',
+    description: 'Categoria do sistema',
+  };
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -342,6 +353,12 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
       <section className="py-4">
         <div
           className="wiki-prose max-w-none"
+          onClick={(e) => {
+            const target = e.target as HTMLElement;
+            if (target.tagName === 'IMG') {
+              setZoomImage((target as HTMLImageElement).src);
+            }
+          }}
           dangerouslySetInnerHTML={{
             __html: renderMarkdownToHtml(article.content),
           }}
@@ -515,6 +532,43 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
                 {isDeleting ? 'Excluindo...' : 'Sim, Excluir'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Image Lightbox / Zoom Modal */}
+      {zoomImage && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in cursor-zoom-out"
+          onClick={() => setZoomImage(null)}
+        >
+          <div 
+            className="relative max-w-5xl max-h-[90vh] flex flex-col items-center cursor-default"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="absolute top-3 right-3 flex items-center gap-2 z-10">
+              <a
+                href={zoomImage}
+                target="_blank"
+                rel="noreferrer"
+                className="px-3 py-1.5 rounded-xl bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm transition text-xs font-semibold flex items-center gap-1.5"
+                title="Abrir imagem em tamanho original"
+              >
+                <span>Tamanho Original</span>
+              </a>
+              <button
+                onClick={() => setZoomImage(null)}
+                className="p-2 rounded-xl bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm transition cursor-pointer"
+                title="Fechar (Esc)"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <img
+              src={zoomImage}
+              alt="Visualização ampliada"
+              className="max-h-[85vh] max-w-full object-contain rounded-2xl shadow-2xl border border-white/10"
+            />
           </div>
         </div>
       )}

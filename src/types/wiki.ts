@@ -37,8 +37,10 @@ export interface Article {
 export interface ArticleCategory {
   id: string;
   name: string;
-  iconName: string;
-  description: string;
+  iconName?: string;
+  description?: string;
+  createdAt?: number;
+  createdBy?: string;
 }
 
 export interface ArticleComment {

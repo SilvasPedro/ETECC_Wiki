@@ -14,7 +14,8 @@ import {
   ListTree,
   Sparkles,
   User as UserIcon,
-  X
+  X,
+  Folder
 } from 'lucide-react';
 import { Article, ArticleCategory, TableOfContentsItem, UserProfile } from '../types/wiki';
 import { DEFAULT_CATEGORIES } from '../data/defaultArticles';
@@ -24,6 +25,7 @@ interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
   articles: Article[];
+  categories?: ArticleCategory[];
   currentArticle: Article | null;
   selectedCategory: string | null;
   onSelectCategory: (categoryId: string | null) => void;
@@ -42,6 +44,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isOpen,
   onClose,
   articles,
+  categories = [],
   currentArticle,
   selectedCategory,
   onSelectCategory,
@@ -56,7 +59,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   activeHeadingId,
 }) => {
   // Category icon mapping
-  const getCategoryIcon = (iconName: string) => {
+  const getCategoryIcon = (iconName?: string) => {
     switch (iconName) {
       case 'Building2': return <Building2 className="w-4 h-4" />;
       case 'ShieldAlert': return <ShieldAlert className="w-4 h-4" />;
@@ -64,9 +67,30 @@ export const Sidebar: React.FC<SidebarProps> = ({
       case 'Code2': return <Code2 className="w-4 h-4" />;
       case 'Users': return <Users className="w-4 h-4" />;
       case 'CheckSquare': return <CheckSquare className="w-4 h-4" />;
+      case 'Folder': return <Folder className="w-4 h-4" />;
       default: return <BookOpen className="w-4 h-4" />;
     }
   };
+
+  // Only show categories that are actually launched with articles in the system
+  const launchedCategories = React.useMemo(() => {
+    const activeCategoryIds = Array.from(new Set(articles.map((a) => a.category).filter(Boolean)));
+    
+    return activeCategoryIds.map((catId) => {
+      const found = (categories || []).find((c) => c.id === catId) || DEFAULT_CATEGORIES.find((c) => c.id === catId);
+      if (found) return found;
+      const formattedName = catId
+        .split('-')
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
+      return {
+        id: catId,
+        name: formattedName,
+        iconName: 'Folder',
+        description: 'Categoria cadastrada',
+      };
+    });
+  }, [articles, categories]);
 
   const pinnedArticles = articles.filter((a) => a.isPinned);
 
@@ -216,40 +240,51 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
           )}
 
-          {/* Categories Tree */}
-          <div>
-            <div className="px-2 mb-1.5 flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-stone-400">
-              <span>Categorias & Setores</span>
-            </div>
-            <div className="space-y-1">
-              {DEFAULT_CATEGORIES.map((cat) => {
-                const count = articles.filter((a) => a.category === cat.id).length;
-                const isSelected = selectedCategory === cat.id && !currentArticle;
+            {/* Categories Tree */}
+            <div>
+              <div className="px-2 mb-1.5 flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-stone-400">
+                <span>Categorias & Setores</span>
+                {launchedCategories.length > 0 && (
+                  <span className="text-[10px] text-stone-400 font-normal">
+                    {launchedCategories.length} {launchedCategories.length === 1 ? 'ativa' : 'ativas'}
+                  </span>
+                )}
+              </div>
+              {launchedCategories.length === 0 ? (
+                <div className="px-3 py-3 rounded-xl bg-stone-100/50 dark:bg-stone-800/30 border border-dashed border-stone-200 dark:border-stone-800 text-center">
+                  <p className="text-[11px] text-stone-400 leading-tight">Nenhuma categoria com publicações ainda.</p>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {launchedCategories.map((cat) => {
+                    const count = articles.filter((a) => a.category === cat.id).length;
+                    const isSelected = selectedCategory === cat.id && !currentArticle;
 
-                return (
-                  <button
-                    key={cat.id}
-                    onClick={() => { onSelectCategory(cat.id); onClose(); }}
-                    className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs transition ${
-                      isSelected
-                        ? 'bg-red-50 dark:bg-red-950/40 text-[#e4022c] font-bold'
-                        : 'text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800/60'
-                    }`}
-                  >
-                    <span className="flex items-center gap-2.5 min-w-0">
-                      <span className={isSelected ? 'text-[#e4022c]' : 'text-stone-400'}>
-                        {getCategoryIcon(cat.iconName)}
-                      </span>
-                      <span className="truncate">{cat.name}</span>
-                    </span>
-                    <span className="text-[10px] text-stone-400 px-1.5 py-0.2 rounded-full bg-stone-200/60 dark:bg-stone-800">
-                      {count}
-                    </span>
-                  </button>
-                );
-              })}
+                    return (
+                      <button
+                        key={cat.id}
+                        onClick={() => { onSelectCategory(cat.id); onClose(); }}
+                        className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs transition ${
+                          isSelected
+                            ? 'bg-red-50 dark:bg-red-950/40 text-[#e4022c] font-bold'
+                            : 'text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800/60'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2.5 min-w-0">
+                          <span className={isSelected ? 'text-[#e4022c]' : 'text-stone-400'}>
+                            {getCategoryIcon(cat.iconName)}
+                          </span>
+                          <span className="truncate">{cat.name}</span>
+                        </span>
+                        <span className="text-[10px] text-stone-400 px-1.5 py-0.2 rounded-full bg-stone-200/60 dark:bg-stone-800">
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          </div>
         </div>
 
         {/* User Footer Profile & photoURL Display */}

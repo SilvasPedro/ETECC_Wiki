@@ -62,5 +62,17 @@ service cloud.firestore {
       allow update, delete: if isAuthenticated() 
                             && resource.data.author.uid == request.auth.uid;
     }
+
+    // ==========================================================
+    // 4. Categorias Dinâmicas do Wiki (wiki_categories)
+    // ==========================================================
+    match /wiki_categories/{categoryId} {
+      // Leitura pública de categorias do Wiki
+      allow read: if true;
+      
+      // Colaboradores autenticados podem cadastrar e atualizar categorias
+      allow create, update: if isAuthenticated();
+      allow delete: if isAuthenticated();
+    }
   }
 }

@@ -22,10 +22,12 @@ import {
   User 
 } from 'firebase/auth';
 import { db, auth } from './config';
-import { Article, ArticleComment, AuthorInfo, UserProfile } from '../types/wiki';
+import { Article, ArticleCategory, ArticleComment, AuthorInfo, UserProfile } from '../types/wiki';
+import { DEFAULT_CATEGORIES } from '../data/defaultArticles';
 
 const ARTICLES_COLLECTION = 'wiki_articles';
 const COMMENTS_COLLECTION = 'wiki_comments';
+const CATEGORIES_COLLECTION = 'wiki_categories';
 const USERS_COLLECTION = 'users';
 const LOCAL_STORAGE_KEY = 'etecc_wiki_articles_real_db_v2';
 const USER_PROFILES_KEY = 'etecc_wiki_user_profiles_cache';
@@ -259,6 +261,54 @@ export async function addArticleComment(comment: {
     createdAt: Date.now(),
   });
   return commentRef.id;
+}
+
+// Subscribe to dynamic categories from Firestore
+export function subscribeCategories(onCategories: (categories: ArticleCategory[]) => void): () => void {
+  try {
+    const q = query(collection(db, CATEGORIES_COLLECTION), orderBy('name', 'asc'));
+    const unsub = onSnapshot(q, async (snapshot) => {
+      if (snapshot.empty) {
+        onCategories(DEFAULT_CATEGORIES);
+        // Persist initial default categories to Firestore
+        try {
+          for (const cat of DEFAULT_CATEGORIES) {
+            await setDoc(doc(db, CATEGORIES_COLLECTION, cat.id), cat);
+          }
+        } catch (e) {
+          // ignore if unauthenticated initially
+        }
+      } else {
+        const items: ArticleCategory[] = [];
+        snapshot.forEach((docSnap) => {
+          items.push({ id: docSnap.id, ...(docSnap.data() as Omit<ArticleCategory, 'id'>) });
+        });
+        onCategories(items);
+      }
+    }, (error) => {
+      console.warn('Categories query note:', error.message);
+      onCategories(DEFAULT_CATEGORIES);
+    });
+
+    return unsub;
+  } catch (err) {
+    console.warn('Failed to listen to categories:', err);
+    onCategories(DEFAULT_CATEGORIES);
+    return () => {};
+  }
+}
+
+// Save or create a new category in Firestore
+export async function saveCategory(category: ArticleCategory): Promise<void> {
+  const catRef = doc(db, CATEGORIES_COLLECTION, category.id);
+  await setDoc(catRef, {
+    id: category.id,
+    name: category.name,
+    iconName: category.iconName || 'Folder',
+    description: category.description || '',
+    createdAt: category.createdAt || Date.now(),
+    createdBy: category.createdBy || '',
+  }, { merge: true });
 }
 
 // User Profile (Cargo & Setor) Management in Firestore & Cache

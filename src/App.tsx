@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User } from 'firebase/auth';
-import { Article, TableOfContentsItem, UserProfile } from './types/wiki';
+import { Article, ArticleCategory, TableOfContentsItem, UserProfile } from './types/wiki';
 import { 
   subscribeArticles, 
   saveArticle, 
@@ -8,7 +8,9 @@ import {
   incrementViews, 
   subscribeAuthState, 
   getUserProfile,
-  cleanLegacyMockArticlesFromFirestore 
+  cleanLegacyMockArticlesFromFirestore,
+  subscribeCategories,
+  saveCategory 
 } from './firebase/wikiService';
 import { extractTableOfContents } from './utils/markdown';
 import { useTheme } from './hooks/useTheme';
@@ -29,6 +31,7 @@ export default function App() {
 
   // State
   const [articles, setArticles] = useState<Article[]>([]);
+  const [categories, setCategories] = useState<ArticleCategory[]>([]);
   const [currentArticle, setCurrentArticle] = useState<Article | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -86,7 +89,15 @@ export default function App() {
     return () => unsub();
   }, [currentArticle?.id]);
 
-  // 3. Extract Table of Contents whenever currentArticle changes
+  // 3. Subscribe to Firestore Categories
+  useEffect(() => {
+    const unsub = subscribeCategories((loadedCategories) => {
+      setCategories(loadedCategories);
+    });
+    return () => unsub();
+  }, []);
+
+  // 4. Extract Table of Contents whenever currentArticle changes
   useEffect(() => {
     if (currentArticle) {
       const items = extractTableOfContents(currentArticle.content);
@@ -225,6 +236,7 @@ export default function App() {
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
           articles={articles}
+          categories={categories}
           currentArticle={currentArticle}
           selectedCategory={selectedCategory}
           onSelectCategory={handleSelectCategory}
@@ -244,6 +256,8 @@ export default function App() {
           {isEditing ? (
             <MarkdownEditor
               initialArticle={articleToEdit}
+              categories={categories}
+              onSaveCategory={saveCategory}
               onSave={handleSaveArticle}
               onCancel={handleBackToList}
               user={user}
@@ -253,6 +267,7 @@ export default function App() {
           ) : currentArticle ? (
             <ArticleView
               article={currentArticle}
+              categories={categories}
               onEdit={handleEditArticle}
               onDelete={handleDeleteArticle}
               onBack={handleBackToList}
@@ -265,6 +280,7 @@ export default function App() {
           ) : (
             <ArticleList
               articles={articles}
+              categories={categories}
               selectedCategory={selectedCategory}
               onSelectCategory={handleSelectCategory}
               onSelectArticle={handleSelectArticle}
@@ -280,6 +296,7 @@ export default function App() {
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
         articles={articles}
+        categories={categories}
         onSelectArticle={handleSelectArticle}
       />
 
