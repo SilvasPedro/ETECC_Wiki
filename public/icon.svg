@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff1a40" />
+      <stop offset="50%" stop-color="#e4022c" />
+      <stop offset="100%" stop-color="#b30020" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <!-- Background with slight rounding for any-purpose icon -->
+  <rect width="512" height="512" rx="108" fill="url(#brandGrad)"/>
+  
+  <!-- Subtle pattern / glow -->
+  <circle cx="256" cy="180" r="140" fill="#ffffff" opacity="0.06"/>
+  
+  <!-- Main Wiki Knowledge Icon (Stylized Open Book + Pages + E monogram hint) -->
+  <g filter="url(#shadow)" fill="#ffffff">
+    <!-- Left page / book wing -->
+    <path d="M128 170 C128 152 144 140 162 144 L244 162 C252 164 256 170 256 178 L256 348 C256 354 250 360 244 358 L160 340 C142 336 128 322 128 304 Z" opacity="0.95"/>
+    
+    <!-- Right page / book wing -->
+    <path d="M384 170 C384 152 368 140 350 144 L268 162 C260 164 256 170 256 178 L256 348 C256 354 262 360 268 358 L352 340 C370 336 384 322 384 304 Z" fill="#ffffff"/>
+    
+    <!-- Center spine spine accent line -->
+    <rect x="253" y="160" width="6" height="200" rx="3" fill="#e4022c" opacity="0.4"/>
+    
+    <!-- Knowledge Bookmark / Spark / Badge in center -->
+    <polygon points="256,120 274,152 256,168 238,152" fill="#ffd166"/>
+  </g>
+
+  <!-- Clean lines representing wiki text lines on right page -->
+  <rect x="284" y="200" width="64" height="8" rx="4" fill="#e4022c" opacity="0.45"/>
+  <rect x="284" y="224" width="52" height="8" rx="4" fill="#e4022c" opacity="0.45"/>
+  <rect x="284" y="248" width="60" height="8" rx="4" fill="#e4022c" opacity="0.45"/>
+  
+  <!-- Clean lines representing wiki text lines on left page -->
+  <rect x="164" y="200" width="64" height="8" rx="4" fill="#b30020" opacity="0.35"/>
+  <rect x="176" y="224" width="52" height="8" rx="4" fill="#b30020" opacity="0.35"/>
+  <rect x="168" y="248" width="60" height="8" rx="4" fill="#b30020" opacity="0.35"/>
+
+  <!-- Brand Label underneath -->
+  <text x="256" y="420" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="34" font-weight="800" letter-spacing="4" fill="#ffffff" text-anchor="middle">ETECC WIKI</text>
+</svg>

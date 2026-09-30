@@ -1,0 +1,66 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Funções auxiliares de autenticação e validação
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // ==========================================================
+    // 1. Artigos da Base de Conhecimento (wiki_articles)
+    // ==========================================================
+    match /wiki_articles/{articleId} {
+      // Leitura de artigos do Wiki
+      allow read: if true;
+      
+      // Criação: Apenas colaboradores logados podem criar novos artigos
+      // O campo author.uid deve obrigatoriamente bater com o UID autenticado
+      allow create: if isAuthenticated() 
+                    && request.resource.data.author.uid == request.auth.uid;
+      
+      // REGRA DE SEGURANÇA:
+      // Apenas quem criou a postagem (autor original) pode EDITAR o artigo
+      // Também permite atualização exclusiva do contador de visualizações (views)
+      allow update: if (isAuthenticated() && resource.data.author.uid == request.auth.uid)
+                    || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views']));
+      
+      // REGRA DE SEGURANÇA:
+      // Apenas quem criou a postagem pode EXCLUIR o artigo
+      allow delete: if isAuthenticated() 
+                    && resource.data.author.uid == request.auth.uid;
+    }
+
+    // ==========================================================
+    // 2. Perfis de Colaboradores (users) - Cargo, Setor e Foto
+    // ==========================================================
+    match /users/{userId} {
+      // Usuários autenticados podem ler os dados de cargo/setor dos autores
+      allow read: if isAuthenticated();
+      
+      // Cada usuário só pode gravar/atualizar o seu próprio registro
+      allow create, update: if isOwner(userId);
+      allow delete: if false; // Previne exclusão acidental de perfil
+    }
+
+    // ==========================================================
+    // 3. Comentários e Discussões (wiki_comments)
+    // ==========================================================
+    match /wiki_comments/{commentId} {
+      // Apenas usuários logados podem visualizar os comentários internos
+      allow read: if isAuthenticated();
+      
+      // Usuários logados podem publicar comentários vinculados ao seu UID
+      allow create: if isAuthenticated() 
+                    && request.resource.data.author.uid == request.auth.uid;
+      
+      // Apenas o autor do comentário pode editar ou excluir
+      allow update, delete: if isAuthenticated() 
+                            && resource.data.author.uid == request.auth.uid;
+    }
+  }
+}

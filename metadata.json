@@ -1,0 +1,6 @@
+{
+  "name": "ETECC Wiki - Base de Conhecimento Interno",
+  "description": "Wiki interno corporativo da ETECC com suporte a PWA, autenticação Firebase, busca rápida inteligente e editor Markdown integrado.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
